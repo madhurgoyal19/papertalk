@@ -1,9 +1,10 @@
 import "./App.css";
+import Workspace from "./Components/Pages/Workspace";
 
 function App() {
   return (
     <div>
-      <h1 className="text-3xl"></h1>
+      <Workspace />
     </div>
   );
 }

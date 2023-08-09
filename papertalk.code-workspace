@@ -8,6 +8,9 @@
     },
     {
       "path": "streamlit"
+    },
+    {
+      "path": "."
     }
   ],
   "settings": {}
