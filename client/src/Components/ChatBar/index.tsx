@@ -4,15 +4,22 @@ import ChatBubble from "../../Components/ChatBubble";
 import Toggle from "../../Components/Toggle";
 import chain from "../../Services/localModels";
 
-const ChatArea = () => {
+interface ChatAreaProps{
+  ChatHistory: Array<Chat>
+}
+
+const ChatArea = (props:ChatAreaProps) => {
   const [localMode, setLocalMode] = useState<boolean>(false);
   const localModeHandler = () => {
     setLocalMode(!localMode);
   };
+  console.log(props.ChatHistory)
   return (
     <div className="flex-1 flex flex-col self-center w-full max-w-[768px] px-4 max-lg:px-0  pt-8">
       <section className="flex-1">
-        <ChatBubble />
+        {props.ChatHistory.map((chat: Chat) => {
+        return <ChatBubble {...chat}/>;
+        })}
       </section>
 
       <div className="text-center mt-10 pb-20">
@@ -24,6 +31,7 @@ const ChatArea = () => {
           Your API Key is stored locally on your browser and never sent anywhere
           else.
         </span>
+        <p>Enter OpenAI Key</p>
       </div>
     </div>
   );
@@ -37,12 +45,20 @@ const ChatHeader = () => {
   );
 };
 
-const PromptInput = () => {
+interface PromptInputProps{
+  ChatHistory: Array<Chat>,
+  ChatHandler: (arg0: Chat) => void
+}
+
+const PromptInput = (props: PromptInputProps) => {
   const [prompt, setPrompt] = useState<string>("");
 
   const submitPromptHandler = async () => {
     if (prompt.length == 0) return;
+    props.ChatHandler({user: "User", result: prompt})
     const result = await chain.call({ question: prompt });
+    props.ChatHandler({user:"GPT", result: result.text});
+    // chatHandler(result);
     console.log(result);
   };
 
@@ -59,14 +75,23 @@ const PromptInput = () => {
       />
     </div>
   );
-};
+}
 
 const ChatBar = () => {
   const [expand, setExpand] = useState<boolean>(false);
   const variants = {
-    expand: { width: "50%" },
+    expand: { width: "60%" },
     closed: { width: "30vw" },
   };
+  const [chatHistory, setChatHistory] = useState<Chat[]>([
+    {user: "GPT", result: "Hi, I am a GPT Bot."}
+  ]);
+
+  const historyHandler = (newChat: Chat) => {
+    chatHistory.push(newChat);
+    setChatHistory(chatHistory);
+    console.log(chatHistory);
+  }
 
   return (
     <motion.div
@@ -77,8 +102,8 @@ const ChatBar = () => {
       <ChatHeader />
 
       <section className="flex-1 flex flex-col ">
-        <ChatArea />
-        <PromptInput />
+        <ChatArea ChatHistory={chatHistory}/>
+        <PromptInput ChatHistory={chatHistory} ChatHandler={historyHandler}   />
       </section>
     </motion.div>
   );
