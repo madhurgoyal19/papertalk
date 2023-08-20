@@ -3,15 +3,13 @@
 @tailwind utilities;
 
 @layer utilities {
-  @variants responsive {
-    .custom-scrollbar::-webkit-scrollbar {
-      width: 8px;
-    }
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 8px;
+  }
 
-    .custom-scrollbar::-webkit-scrollbar-thumb {
-      background-color: #20212e;
-      outline: 1px solid #2c2e3c;
-      border-radius: 10px;
-    }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: #20212e;
+    outline: 1px solid #2c2e3c;
+    border-radius: 10px;
   }
 }

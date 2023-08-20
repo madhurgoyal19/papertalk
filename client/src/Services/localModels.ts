@@ -1,23 +1,29 @@
 import { OpenAI } from "langchain";
 import { PromptTemplate } from "langchain/prompts";
-import { LLMChain } from "langchain/chains";
-import { OPEN_AI_API_KEY, OPEN_AI_TEMPERATURE } from "../constants.ts";
 
-// const template = `Given the following conversation and a follow up question, rephrase the follow up question to be a standalone question, in its original language.
+import { OpenAIEmbeddings } from "langchain/embeddings/openai";
+import { MemoryVectorStore } from "langchain/vectorstores/memory";
+import {
+  LLMChain,
+  SimpleSequentialChain,
+  RetrievalQAChain,
+  loadQAStuffChain,
+} from "langchain/chains";
+import { OPEN_AI_API_KEY, OPEN_AI_TEMPERATURE } from "@Constants";
+import { BaseRetriever } from "langchain/schema/retriever";
+import { Document } from "node_modules/langchain/dist/document";
 
-// Chat History:
-// {chat_history}
-// Follow Up Input: {question}
-// Standalone question:`;
+const template = `Given the following conversation and a follow up question, answer the question. 
 
-// const promptTemplate = new PromptTemplate({
-//   template: template,
-//   inputVariables: ["chat_history", "question"],
-// });
+Chat History:
+{chat_history}
+Follow Up Input: {question}
+Answer:`;
 
-const t = `Be funny when answering questions\n Question: {question}`;
-
-const pt = new PromptTemplate({ template: t, inputVariables: ["question"] });
+const pt = new PromptTemplate({
+  template: template,
+  inputVariables: ["chat_history", "question"],
+});
 
 const openAIModel = new OpenAI({
   openAIApiKey: OPEN_AI_API_KEY,
@@ -28,5 +34,25 @@ const chain = new LLMChain({
   llm: openAIModel,
   prompt: pt,
 });
+
+const AddPDFToChain = async (documents: Document<Record<string, any>>[]) => {
+  const embeddings = new OpenAIEmbeddings({
+    openAIApiKey: OPEN_AI_API_KEY,
+    verbose: true,
+  });
+
+  const vectorStore = await MemoryVectorStore.fromDocuments(
+    documents,
+    embeddings
+  );
+
+  const chain = new RetrievalQAChain({
+    combineDocumentsChain: loadQAStuffChain(openAIModel),
+    retriever: vectorStore.asRetriever(),
+    returnSourceDocuments: true,
+  });
+
+  return chain;
+};
 
 export default chain;
