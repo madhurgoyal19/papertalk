@@ -108,20 +108,21 @@ const ChatWindow = (props: ChatWindowProps) => {
   const [loading, setLoading] = useState<boolean>(false);
 
   useEffect(() => {
-    if (messages?.length > 0) {
-      ChatTable.update(props.chatId, { messages: [...messages] });
-    } else {
-      ChatTable.get(props.chatId).then((chat: Chat | undefined) => {
-        if (!chat) return;
-        setMessages(chat.messages);
-      });
-    }
-  }, [props.chatId, messages]);
+    ChatTable.get(props.chatId).then((chat: Chat | undefined) => {
+      if (!chat) return;
+      setMessages(chat.messages);
+    });
+  }, [props.chatId]);
 
-  const variants = {
-    expand: { width: "50%" },
-    closed: { width: "30vw" },
-  };
+  useEffect(() => {
+    if (messages.length > 0)
+      ChatTable.update(props.chatId, { messages: [...messages] });
+  }, [messages]);
+
+  // const variants = {
+  //   expand: { width: "50%" },
+  //   closed: { width: "30vw" },
+  // };
 
   const historyHandler = (ChatMessage: Message) => {
     setMessages((messages) => [...messages, ChatMessage]);

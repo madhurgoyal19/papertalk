@@ -7,8 +7,12 @@ const ActivityBar = () => {
   const [chatList] = useLocalStorage<Array<ChatSmall>>("chatList");
   const Navigate = useNavigate();
 
-  const createChatHandler = () => {
-    const chatId = createChat();
+  const createChatHandler = async () => {
+    const chatId = await createChat();
+    Navigate("/chats/" + chatId, { replace: true });
+  };
+
+  const openChatHandler = async (chatId: string) => {
     Navigate("/chats/" + chatId, { replace: true });
   };
 
@@ -18,13 +22,24 @@ const ActivityBar = () => {
         <div>PaperTalk</div>
         <div></div>
       </div>
-      <div>
-        <div onClick={createChatHandler} className="cursor-pointer">
+      <div className="p-2">
+        <div
+          onClick={createChatHandler}
+          className="cursor-pointer bg-slate-300 m-1 rounded-sm text-base p-2 hover:-translate-y-1 transition"
+        >
           New Chat
         </div>
         <section>
           {chatList?.map((chat: ChatSmall) => {
-            return <div key={chat.chatId}>{chat.chatTitle}</div>;
+            return (
+              <div
+                onClick={() => openChatHandler(chat.chatId)}
+                key={chat.chatId}
+                className="cursor-pointer"
+              >
+                {chat.chatTitle}
+              </div>
+            );
           })}
         </section>
         <section></section>

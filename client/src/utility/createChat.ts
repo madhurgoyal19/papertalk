@@ -2,20 +2,16 @@ import { v4 as uuidv4 } from "uuid";
 import { ChatTable } from "@Database";
 import { writeStorage } from "@rehooks/local-storage";
 
-const createChat = () => {
+const createChat = async () => {
   const newChat = localStorage.getItem("newChat");
+  const ct = newChat && (await ChatTable.get(newChat));
 
-  if (newChat) {
+  if (ct && ct?.messages.length <= 1) {
     return newChat;
   }
   const chatId = uuidv4();
-  const chatList = localStorage.getItem("chatList");
-  if (chatList) {
-    const data = JSON.parse(localStorage.getItem("chatList")!);
-    writeStorage("chatList", [...data, { chatId, chatTitle: "Welcome" }]);
-  } else {
-    writeStorage("chatList", [{ chatId, chatTitle: "Welcome" }]);
-  }
+  const data = JSON.parse(localStorage.getItem("chatList")!) || [];
+  writeStorage("chatList", [...data, { chatId, chatTitle: "Welcome" }]);
   writeStorage("newChat", chatId);
 
   ChatTable.add(
